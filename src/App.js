@@ -1,22 +1,36 @@
 import React from 'react';
+import { getPosts } from './api/posts';
 
 const SORT_BY = {
   ASC: 'ASC',
   DESC: 'DESC',
 };
 
+const Post = (props) => {
+  const {post} = props;
+  return (
+    <div key={post.timestamp}>
+      <h5>{post.titulo}</h5>
+      <div>{post.corpo}</div>
+      <div>{post.autor}</div>
+      <div>{post.categoria}</div>
+      <button onClick={() => this.handleClick(post.id)}>Excluir</button>
+      <hr></hr>
+    </div>
+  );
+}
+
 class App extends React.Component {
   state = {
-    posts: [
-      { id: 1, titulo: 'Titulo post 1', resumo: 'Resumo post 1' },
-      { id: 2, titulo: 'Titulo post 2', resumo: 'Resumo post 2' },
-      { id: 3, titulo: 'Titulo post 3', resumo: 'Resumo post 3' },
-      { id: 4, titulo: 'Titulo post 4', resumo: 'Resumo post 4' },
-      { id: 5, titulo: 'Titulo post 5', resumo: 'Resumo post 5' },
-      { id: 6, titulo: 'Titulo post 6', resumo: 'Resumo post 6' },
-    ],
+    posts: [],
     sortBy: SORT_BY.ASC,
   };
+
+  componentDidMount() {
+    console.log('componentDidMount')
+
+    getPosts().then((res) => this.setState({posts : res.posts})) ;
+  }
 
   handleClick = (id) => {
     const posts = this.state.posts.filter((item) => item.id !== id);
@@ -25,17 +39,18 @@ class App extends React.Component {
 
   sortPosts = (a, b) => {
     if (this.state.sortBy === SORT_BY.ASC) {
-      return a.id - b.id;
+      return a.timestamp - b.timestamp;
     } else {
-      return b.id - a.id;
+      return b.timestamp - a.timestamp;
     }
   };
 
   handleSort = (sortBy) => this.setState({ sortBy });
 
   render() {
+    console.log('render')
     const { posts } = this.state;
-    const sortedPosts = posts.slice().sort(this.sortPosts);
+    const sortedPosts = posts ? posts.slice().sort(this.sortPosts) : [];
 
     return (
       <div>
@@ -43,14 +58,10 @@ class App extends React.Component {
           <button onClick={() => this.handleSort(SORT_BY.ASC)}>SORT ASC</button>
           <button onClick={() => this.handleSort(SORT_BY.DESC)}>SORT DESC</button>
         </div>
-        {sortedPosts.map((item) => (
-          <div key={item.id}>
-            <h5>{item.titulo}</h5>
-            <p>{item.resumo}</p>
-            <button onClick={() => this.handleClick(item.id)}>Excluir</button>
-            <hr></hr>
-          </div>
-        ))}
+        {sortedPosts.map((item) => {
+          return (<Post post={item}/>);
+        }
+        )}
       </div>
     );
   }
